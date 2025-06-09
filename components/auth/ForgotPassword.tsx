@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import ResetVerify from './ResetVerify';
 import { API_BASE_URL } from '@/services/api';

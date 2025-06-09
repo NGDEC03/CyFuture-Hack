@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useEffect, useRef } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { ApiResponse, RequestProp, VerifyRequest } from '@/types/auth';

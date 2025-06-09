@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { API_BASE_URL } from '@/services/api';

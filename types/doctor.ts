@@ -4,7 +4,8 @@ export interface Doctor {
     userId: string;
     specialization: string[];
     qualifications: string[];
-    noOfPatients: number
+    noOfPatients: number;
+    patientsCount: string;
     ratings: number;
     about: string;
     price: number;

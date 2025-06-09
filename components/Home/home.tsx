@@ -2,6 +2,7 @@
 import { useState, type FC } from 'react';
 // import Banner from '../../components/Banner/Banner'
 import Categories from '../dash/hospital/Categories';
+import HospitalList from '../dash/hospital/HospitalList';
 
 const Home: FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('Cardiology');
@@ -28,7 +29,7 @@ const Home: FC = () => {
                         initialCategory={selectedCategory}
                     />
                 </div>
-                {/* <HospitalList selectedCategory={selectedCategory} /> */}
+                <HospitalList selectedCategory={selectedCategory} />
             </div>
         </main>
     )

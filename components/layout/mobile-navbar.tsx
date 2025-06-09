@@ -10,7 +10,6 @@ import Image from 'next/image'
 const MobileNavbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const location = window.location;
     const isHomePage = location.pathname === '/'
 
     // Add click outside handler

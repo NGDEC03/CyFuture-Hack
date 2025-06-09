@@ -1,3 +1,4 @@
+import { User } from "./user";
 
 export interface Doctor {
     id: string;
@@ -15,22 +16,30 @@ export interface Doctor {
         email: string;
         profile: string | null;
     };
-    availability: Array<{
-        id: string;
-        doctorId: string;
-        day: string;
-        startTime: string;
-        endTime: string;
-        labId: string | null;
-    }>;
-    reviews: Array<{
-        id: string;
-        doctorId: string;
-        userId: string;
-        rating: number;
-        comment: string;
-        createdAt: string;
-    }>;
+    availability: AvailabilitySlot[];
+    reviews: Review[];
+}
+
+export interface Review {
+    id: string;
+    doctorId: string;
+    userId: string;
+    rating: number;
+    comment?: string;
+    createdAt: Date;
+    doctor: Doctor;
+    user: User | null;
+}
+
+export interface AvailabilitySlot {
+    id: string;
+    doctorId: string;
+    day: string;
+    startTime: string;
+    endTime: string;
+    doctor: Doctor;
+    lab?: Lab;
+    labId?: string;
 }
 
 export interface Hospital {

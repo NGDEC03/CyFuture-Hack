@@ -1,13 +1,9 @@
 import { useState } from 'react'
 import type { FC } from 'react'
 import BookingForm from '../booking/BookingForm';
-import { Doctor } from '@/types/doctor';
+import { Doctor, Review, AvailabilitySlot } from '@/types/doctor';
 
-interface DoctorInfoProps {
-    doctor: Doctor
-}
-
-const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
+const DoctorInfo: FC<{ doctor: Doctor }> = ({ doctor }) => {
     console.log(doctor);
 
     const [activeTab, setActiveTab] = useState<'about' | 'reviews' | 'others'>('about');
@@ -25,7 +21,7 @@ const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
                         {['about', 'reviews', 'others'].map(tab => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab as any)}
+                                onClick={() => setActiveTab(tab as 'about' | 'reviews' | 'others')}
                                 className={`px-4 py-2 rounded-full ${activeTab === tab ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:bg-gray-100'
                                     }`}
                             >
@@ -61,7 +57,7 @@ const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
                         {activeTab === 'reviews' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Patient Reviews</h3>
-                                {doctor.reviews.map((review: any) => (
+                                {doctor.reviews.map((review: Review) => (
                                     <div key={review.id} className="bg-gray-50 p-4 rounded-lg">
                                         <div className="flex items-center gap-2">
                                             <span className="text-yellow-400">{'★'.repeat(review.rating)}</span>
@@ -76,7 +72,7 @@ const DoctorInfo: FC<DoctorInfoProps> = ({ doctor }) => {
                         {activeTab === 'others' && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-semibold text-gray-800">Availability</h3>
-                                {doctor.availability.map((slot: any) => (
+                                {doctor.availability.map((slot: AvailabilitySlot) => (
                                     <div key={slot.id} className="text-gray-600">
                                         {slot.day}: {slot.startTime} - {slot.endTime}
                                     </div>

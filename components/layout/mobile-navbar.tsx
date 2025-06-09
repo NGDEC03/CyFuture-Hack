@@ -1,3 +1,4 @@
+'use client';
 import type { FC } from 'react'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'

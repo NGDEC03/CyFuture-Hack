@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/styles/globals.css";
-import { metadata as siteMetadata } from '@/config/metadata';
-import CustomHead from "@/components/head";
+// import { metadata as siteMetadata } from '@/config/metadata';
+// import CustomHead from "@/components/head";
 import Provider from "./provider";
 
 const geistSans = Geist({
@@ -15,7 +15,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = siteMetadata;
+export const metadata: Metadata = {
+  title : "",
+  description: "",
+};
 
 export default function RootLayout({
   children,
@@ -25,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <CustomHead />
+        {/* <CustomHead /> */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

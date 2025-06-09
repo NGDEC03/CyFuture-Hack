@@ -22,7 +22,6 @@ const Navbar: FC = () => {
     const [isSearching, setIsSearching] = useState(false)
     const [userLocation, setUserLocation] = useState<Location | null>(null)
     const [isGettingLocation, setIsGettingLocation] = useState(false)
-    const location = window.location;
     const isHomePage = location.pathname === '/';
 
     const navigate = (path: string) => {

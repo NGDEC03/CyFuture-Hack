@@ -1,3 +1,4 @@
+'use client';
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import axios from "axios";
 import { SessionContextType, User } from "@/types/session";

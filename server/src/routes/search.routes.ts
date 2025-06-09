@@ -63,23 +63,13 @@ console.log(doctors);
 //* Search hospitals by name/location/etc... (verified**)
 router.get('/hospitals', asyncHandler(async (req: Request, res: Response) => {
     try {
-        const { name, lat, lng, radius, department, service, location } = req.query;
+        const { name, lat, lng, radius, department, service } = req.query;
 
         const where: any = {
             name: name ? { contains: name as string, mode: 'insensitive' } : undefined,
             departments: department ? { has: department as string } : undefined,
             services: service ? { has: service as string } : undefined
         };
-
-        // Add location search if provided
-        if (location) {
-            where.location = {
-                address: {
-                    contains: location as string,
-                    mode: 'insensitive'
-                }
-            };
-        }
 
         let hospitals = await prisma.hospital.findMany({
             where,
@@ -121,14 +111,6 @@ router.get('/hospitals', asyncHandler(async (req: Request, res: Response) => {
 
                 return distance <= searchRadius;
             });
-
-            // Sort by distance
-            hospitals.sort((a, b) => {
-                if (!a.location || !b.location) return 0;
-                const distA = calculateDistance(userLat, userLng, a.location.lat, a.location.lng);
-                const distB = calculateDistance(userLat, userLng, b.location.lat, b.location.lng);
-                return distA - distB;
-            });
         }
 
         res.status(200).json(hospitals);
@@ -138,25 +120,14 @@ router.get('/hospitals', asyncHandler(async (req: Request, res: Response) => {
     }
 }));
 
-//* Search labs by name/location/etc... (verified**)
 router.get('/labs', asyncHandler(async (req: Request, res: Response) => {
     try {
-        const { name, lat, lng, radius, service, location } = req.query;
+        const { name, lat, lng, radius, service } = req.query;
 
         const where: any = {
             name: name ? { contains: name as string, mode: 'insensitive' } : undefined,
             services: service ? { has: service as string } : undefined
         };
-
-        // Add location search if provided
-        if (location) {
-            where.location = {
-                address: {
-                    contains: location as string,
-                    mode: 'insensitive'
-                }
-            };
-        }
 
         let labs = await prisma.lab.findMany({
             where,
@@ -169,8 +140,8 @@ router.get('/labs', asyncHandler(async (req: Request, res: Response) => {
                 }
             }
         });
+        
 
-        // Filter by distance if coordinates provided
         if (lat && lng && radius) {
             const userLat = parseFloat(lat as string);
             const userLng = parseFloat(lng as string);
@@ -187,14 +158,6 @@ router.get('/labs', asyncHandler(async (req: Request, res: Response) => {
                 );
 
                 return distance <= searchRadius;
-            });
-
-            // Sort by distance
-            labs.sort((a, b) => {
-                if (!a.location || !b.location) return 0;
-                const distA = calculateDistance(userLat, userLng, a.location.lat, a.location.lng);
-                const distB = calculateDistance(userLat, userLng, b.location.lat, b.location.lng);
-                return distA - distB;
             });
         }
 

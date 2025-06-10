@@ -1,0 +1,828 @@
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Medical Assistant
+  </title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;display=swap" rel="stylesheet"/>
+  <style>
+   body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    #chatContainer::-webkit-scrollbar {
+      width: 8px;
+    }
+    #chatContainer::-webkit-scrollbar-thumb {
+      background-color: #a78bfa;
+      border-radius: 4px;
+    }
+    #chatContainer::-webkit-scrollbar-track {
+      background: #ede9fe;
+    }
+    /* Firefox scrollbar */
+    #chatContainer {
+      scrollbar-width: thin;
+      scrollbar-color: #a78bfa #ede9fe;
+    }
+    .drop-zone-active {
+      border-color: #7c3aed !important;
+      background-color: #ede9fe !important;
+      transform: scale(1.03);
+      transition: all 0.2s ease;
+    }
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .typing-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #7c3aed;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
+    }
+    .doctor-card {
+      transition: all 0.3s ease;
+      background: #faf5ff;
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 4px 12px rgb(124 58 237 / 0.15);
+      border: 1px solid #ddd6fe;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .doctor-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 25px rgb(124 58 237 / 0.3);
+      background: #f3e8ff;
+      border-color: #a78bfa;
+    }
+    .doctor-info {
+      flex: 1 1 auto;
+      min-width: 180px;
+    }
+    .doctor-name {
+      font-weight: 700;
+      font-size: 1.125rem;
+      color: #5b21b6;
+      margin-bottom: 0.15rem;
+      user-select: text;
+    }
+    .doctor-specialization {
+      font-size: 0.9rem;
+      color: #7c3aed;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+      user-select: text;
+    }
+    .doctor-location {
+      font-size: 0.85rem;
+      color: #a78bfa;
+      user-select: text;
+    }
+    .doctor-rating {
+      flex-shrink: 0;
+      font-size: 0.9rem;
+      color: #c084fc;
+      font-weight: 600;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .doctor-rating-stars {
+      color: #a855f7;
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+    .message-content {
+      line-height: 1.6;
+      font-size: 0.95rem;
+      word-break: break-word;
+      user-select: text;
+    }
+    .message-content ul {
+      margin: 0.5rem 0;
+      padding-left: 1.25rem;
+      list-style-type: disc;
+    }
+    .message-content li {
+      margin: 0.25rem 0;
+    }
+    .message-content strong {
+      font-weight: 600;
+    }
+    .message-content p {
+      margin: 0.5rem 0;
+    }
+    .message-type-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      user-select: none;
+      box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+      background-clip: padding-box;
+    }
+    .type-symptoms {
+      background-color: #fef3c7;
+      color: #b45309;
+      box-shadow: 0 0 8px rgb(202 138 4 / 0.4);
+    }
+    .type-report {
+      background-color: #dbeafe;
+      color: #1e40af;
+      box-shadow: 0 0 8px rgb(59 130 246 / 0.4);
+    }
+    .type-general {
+      background-color: #ede9fe;
+      color: #5b21b6;
+      box-shadow: 0 0 8px rgb(124 58 237 / 0.4);
+    }
+    .quick-upload {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .quick-upload input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    .pulse-dot {
+      animation: pulse 2s infinite;
+      color: #a78bfa;
+      font-weight: 900;
+      font-size: 1.25rem;
+      line-height: 1;
+      user-select: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    /* Scrollbar for Firefox */
+    #chatContainer {
+      scrollbar-width: thin;
+      scrollbar-color: #a78bfa #ede9fe;
+    }
+    /* Responsive tweaks */
+    @media (max-width: 640px) {
+      #chatContainer > div > div.max-w-\[80\%\] {
+        max-width: 100% !important;
+      }
+      header div.max-w-6xl {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+      header div.flex.items-center.gap-4 {
+        width: 100%;
+        justify-content: center;
+      }
+      .doctor-card {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .doctor-rating {
+        margin-top: 0.5rem;
+      }
+    }
+  </style>
+ </head>
+ <body>
+  <!-- Header -->
+  <header class="bg-white/20 backdrop-blur-md border-b border-white/30 p-5 shadow-lg sticky top-0 z-30">
+   <div class="max-w-6xl mx-auto flex items-center justify-between flex-wrap gap-4">
+    <div class="flex items-center gap-4 flex-shrink-0">
+     <div aria-hidden="true" class="text-4xl select-none">
+      🏥
+     </div>
+     <div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight select-text">
+       Smart Medical Assistant
+      </h1>
+      <p class="text-white/90 text-sm mt-1 flex items-center gap-2 select-none">
+       <span class="pulse-dot">
+        ●
+       </span>
+       Auto-detects symptoms, reports, and general questions
+      </p>
+     </div>
+    </div>
+    <div class="flex items-center gap-4 flex-shrink-0">
+     <div class="quick-upload">
+      <input accept=".pdf" aria-label="Upload PDF lab report" id="quickPdfFile" type="file"/>
+      <label class="bg-white/25 hover:bg-white/40 text-white px-5 py-2 rounded-xl transition-all duration-200 flex items-center gap-3 cursor-pointer select-none shadow-md shadow-black/20" for="quickPdfFile">
+       <i class="fas fa-upload fa-lg">
+       </i>
+       <span class="font-semibold">
+        Quick Upload
+       </span>
+      </label>
+     </div>
+     <button aria-label="Clear chat" class="bg-red-600/30 hover:bg-red-600/50 text-white px-5 py-2 rounded-xl transition-all duration-200 flex items-center gap-3 select-none shadow-md shadow-black/20" id="clearBtn" onclick="clearChat()" type="button">
+      <i class="fas fa-trash-alt fa-lg">
+      </i>
+      <span class="font-semibold">
+       Clear
+      </span>
+     </button>
+    </div>
+   </div>
+  </header>
+  <main class="max-w-6xl mx-auto p-5 flex-1 flex flex-col h-[calc(100vh-96px)]">
+   <!-- File Info (Hidden by default) -->
+   <div class="hidden bg-purple-700/90 border border-purple-500 rounded-xl p-5 mb-5 text-white shadow-lg flex items-center gap-4 select-text" id="fileInfo">
+    <i class="fas fa-file-pdf fa-2x">
+    </i>
+    <div class="flex flex-col">
+     <div class="font-semibold text-lg" id="fileInfoName">
+     </div>
+     <div class="text-sm opacity-90" id="fileInfoLength">
+     </div>
+    </div>
+    <button aria-label="Remove uploaded file" class="ml-auto text-white/70 hover:text-white transition-colors" onclick="clearFile()" type="button">
+     <i class="fas fa-times fa-lg">
+     </i>
+    </button>
+   </div>
+   <!-- Chat Container -->
+   <section class="flex-1 bg-white/90 rounded-3xl border border-purple-300 flex flex-col overflow-hidden shadow-2xl">
+    <!-- Chat Messages -->
+    <div aria-live="polite" aria-relevant="additions" class="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-thin scrollbar-thumb-purple-400 scrollbar-track-purple-100" id="chatContainer" role="log">
+     <!-- Welcome Message -->
+     <div class="flex items-start gap-4 max-w-3xl mx-auto">
+      <div aria-hidden="true" class="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center text-white text-2xl select-none shadow-lg">
+       🤖
+      </div>
+      <div class="bg-purple-50 rounded-3xl p-6 max-w-[80%] shadow-lg border border-purple-200">
+       <div class="font-semibold text-purple-900 mb-3 text-xl select-text">
+        Smart Medical Assistant
+       </div>
+       <div class="text-purple-800 select-text leading-relaxed">
+        Hello! I'm your intelligent medical assistant. I can automatically detect and help with:
+        <ul class="list-disc list-inside mt-3 space-y-1">
+         <li>
+          <span class="font-semibold text-orange-600">
+           Symptoms
+          </span>
+          - Describe how you feel and get doctor recommendations
+         </li>
+         <li>
+          <span class="font-semibold text-blue-600">
+           Lab Reports
+          </span>
+          - Upload PDFs for instant analysis
+         </li>
+         <li>
+          <span class="font-semibold text-purple-600">
+           General Questions
+          </span>
+          - Ask about health conditions, medications, etc.
+         </li>
+        </ul>
+        <div class="mt-5 p-4 bg-blue-100 border-l-6 border-blue-600 rounded-lg text-sm text-blue-900 font-semibold select-text shadow-sm flex items-center gap-2">
+         <i class="fas fa-robot text-blue-600 text-lg">
+         </i>
+         <span>
+          <strong>
+           Smart Detection:
+          </strong>
+          Just type your message naturally - I'll automatically understand what type of help you need!
+         </span>
+        </div>
+        <div class="mt-4 p-4 bg-yellow-100 border-l-6 border-yellow-500 rounded-lg text-sm text-yellow-900 font-semibold select-text shadow-sm flex items-center gap-2">
+         <i class="fas fa-exclamation-triangle text-yellow-600 text-lg">
+         </i>
+         <span>
+          <strong>
+           Important:
+          </strong>
+          I provide educational information only. Always consult your healthcare provider for medical advice.
+         </span>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+    <!-- Input Area -->
+    <form class="p-6 border-t border-purple-300 bg-purple-50 rounded-b-3xl flex flex-col gap-5" id="chatForm" onsubmit="event.preventDefault(); sendMessage();">
+     <label class="sr-only" for="questionInput">
+      Type your message
+     </label>
+     <div class="flex gap-4">
+      <input aria-autocomplete="list" aria-describedby="sampleQuestions" aria-label="Type your message here" autocomplete="off" class="flex-1 bg-white border border-purple-300 rounded-2xl px-6 py-4 text-purple-900 placeholder-purple-400 focus:outline-none focus:ring-4 focus:ring-purple-400 focus:border-transparent shadow-md transition" id="questionInput" name="questionInput" placeholder="Type anything: symptoms, questions, or drag &amp; drop a PDF report..." type="text"/>
+      <button aria-label="Send message" class="bg-purple-700 hover:bg-purple-800 text-white px-8 py-4 rounded-2xl font-semibold transition-all duration-200 disabled:bg-purple-300 disabled:cursor-not-allowed shadow-lg flex items-center justify-center" id="sendBtn" type="submit">
+       <i class="fas fa-paper-plane fa-lg">
+       </i>
+      </button>
+     </div>
+     <!-- Sample Questions -->
+     <div class="text-purple-700 text-sm select-none" id="sampleQuestions">
+      <div class="mb-2 font-semibold">
+       Try these examples:
+      </div>
+      <div class="flex flex-wrap gap-3 max-w-3xl">
+       <button aria-label="Symptom example" class="bg-orange-400/30 hover:bg-orange-400/50 text-orange-900 text-xs px-4 py-1 rounded-full transition-all duration-200 border border-orange-400/50 shadow-sm flex items-center gap-2 select-none" onclick="askSampleQuestion('I have severe headache and nausea for 2 days')" type="button">
+        <span class="text-lg">
+         🩺
+        </span>
+        Symptom example
+       </button>
+       <button aria-label="General question example" class="bg-purple-600/30 hover:bg-purple-600/50 text-purple-900 text-xs px-4 py-1 rounded-full transition-all duration-200 border border-purple-600/50 shadow-sm flex items-center gap-2 select-none" onclick="askSampleQuestion('What causes high blood pressure?')" type="button">
+        <span class="text-lg">
+         ❓
+        </span>
+        General question
+       </button>
+       <button aria-label="Report question example" class="bg-blue-500/30 hover:bg-blue-500/50 text-blue-900 text-xs px-4 py-1 rounded-full transition-all duration-200 border border-blue-500/50 shadow-sm flex items-center gap-2 select-none" onclick="askSampleQuestion('Explain my cholesterol levels')" type="button">
+        <span class="text-lg">
+         📊
+        </span>
+        Report question
+       </button>
+       <button aria-label="Doctor recommendation example" class="bg-green-500/30 hover:bg-green-500/50 text-green-900 text-xs px-4 py-1 rounded-full transition-all duration-200 border border-green-500/50 shadow-sm flex items-center gap-2 select-none" onclick="askSampleQuestion('feeling dizzy and tired, what specialist should I see?')" type="button">
+        <span class="text-lg">
+         👨‍⚕️
+        </span>
+        Doctor recommendation
+       </button>
+      </div>
+     </div>
+    </form>
+   </section>
+  </main>
+  <!-- Drag & Drop Overlay -->
+  <div class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6" id="dragOverlay">
+   <div class="bg-white rounded-3xl p-10 text-center max-w-sm mx-4 shadow-2xl select-none">
+    <img alt="Icon of a PDF document with a folded corner and text lines" class="mx-auto mb-6" height="96" src="https://storage.googleapis.com/a1aa/image/29cf4c76-d9bb-4ac4-fce4-3cc0d6232a57.jpg" width="96"/>
+    <h3 class="text-2xl font-bold text-gray-900 mb-3">
+     Drop PDF Report Here
+    </h3>
+    <p class="text-gray-700 text-base leading-relaxed">
+     Release to upload your lab report for instant analysis and recommendations.
+    </p>
+   </div>
+  </div>
+  <script>
+   let currentSessionId = null;
+    let isProcessing = false;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      setupEventListeners();
+      document.getElementById('questionInput').focus();
+    });
+
+    function setupEventListeners() {
+      const quickFileInput = document.getElementById('quickPdfFile');
+      
+      // Quick file upload
+      quickFileInput.addEventListener('change', handleQuickFileSelect);
+
+      // Global drag and drop
+      document.addEventListener('dragover', handleGlobalDragOver);
+      document.addEventListener('dragleave', handleGlobalDragLeave);
+      document.addEventListener('drop', handleGlobalDrop);
+    }
+
+    function handleQuickFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) {
+        handleFileUpload(file);
+      }
+    }
+
+    function handleGlobalDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Check if dragged item contains files
+      if (e.dataTransfer.types.includes('Files')) {
+        document.getElementById('dragOverlay').classList.remove('hidden');
+      }
+    }
+
+    function handleGlobalDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Only hide if leaving the window
+      if (e.clientX === 0 || e.clientY === 0) {
+        document.getElementById('dragOverlay').classList.add('hidden');
+      }
+    }
+
+    function handleGlobalDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('dragOverlay').classList.add('hidden');
+      
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        const file = files[0];
+        if (file.type === 'application/pdf') {
+          handleFileUpload(file);
+        } else {
+          showError('Please upload a PDF file only.');
+        }
+      }
+    }
+
+    async function handleFileUpload(file) {
+      if (file.size > 16 * 1024 * 1024) {
+        showError('File size must be less than 16MB.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      try {
+        setLoading(true);
+        addMessage('system', `📤 Uploading "<strong>${file.name}</strong>"...`);
+        
+        const response = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          currentSessionId = result.session_id;
+          showFileInfo(result.filename, result.text_length);
+          addMessage('system', `✅ PDF "<strong>${result.filename}</strong>" uploaded successfully! You can now ask questions about your lab report.`);
+        } else {
+          showError(result.error || 'Upload failed');
+        }
+      } catch (error) {
+        showError('Upload failed: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function showFileInfo(filename, textLength) {
+      const fileInfo = document.getElementById('fileInfo');
+      const fileNameEl = document.getElementById('fileInfoName');
+      const fileLengthEl = document.getElementById('fileInfoLength');
+      fileNameEl.textContent = filename;
+      fileLengthEl.textContent = `${textLength.toLocaleString()} characters extracted`;
+      fileInfo.classList.remove('hidden');
+    }
+
+    function clearFile() {
+      currentSessionId = null;
+      document.getElementById('fileInfo').classList.add('hidden');
+      document.getElementById('quickPdfFile').value = '';
+    }
+
+    function detectMessageType(query) {
+      const lowerQuery = query.toLowerCase();
+      
+      const symptomKeywords = [
+        'pain', 'ache', 'hurt', 'sore', 'burning', 'itching', 'swelling',
+        'fever', 'headache', 'nausea', 'vomiting', 'diarrhea', 'constipation',
+        'dizzy', 'tired', 'fatigue', 'weakness', 'shortness of breath',
+        'cough', 'sneeze', 'runny nose', 'congestion', 'rash', 'bleeding',
+        'cramps', 'spasms', 'stiffness', 'numbness', 'tingling',
+        'feel', 'feeling', 'experiencing', 'having', 'suffering',
+        'days', 'weeks', 'hours', 'since', 'ago', 'started',
+        'doctor', 'specialist', 'recommend', 'see', 'visit'
+      ];
+
+      const reportKeywords = [
+        'report', 'results', 'test', 'lab', 'blood', 'urine', 'levels',
+        'cholesterol', 'glucose', 'hemoglobin', 'creatinine', 'bilirubin',
+        'analysis', 'interpret', 'explain', 'mean', 'normal', 'abnormal',
+        'high', 'low', 'elevated', 'decreased', 'values'
+      ];
+
+      const symptomCount = symptomKeywords.filter(keyword => lowerQuery.includes(keyword)).length;
+      const reportCount = reportKeywords.filter(keyword => lowerQuery.includes(keyword)).length;
+
+      if (currentSessionId && reportCount > 0) {
+        return 'report';
+      }
+      
+      if (symptomCount >= 2 || 
+          /feel(ing)?\s+(sick|unwell|bad|terrible|awful)/i.test(query) ||
+          /have\s+(been|a|an)\s+\w+ing/i.test(query) ||
+          /\d+\s+(day|week|hour|month)s?\s+(ago|of|with)/i.test(query)) {
+        return 'symptoms';
+      }
+
+      return 'general';
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('questionInput');
+      const query = input.value.trim();
+      
+      if (!query || isProcessing) return;
+
+      const messageType = detectMessageType(query);
+      
+      addMessage('user', query, messageType);
+      input.value = '';
+      input.focus();
+      
+      try {
+        setLoading(true);
+        
+        let response;
+        
+        if (messageType === 'symptoms') {
+          response = await fetch('/symptoms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              symptoms: query
+            })
+          });
+        } else if (messageType === 'report' && currentSessionId) {
+          response = await fetch('/ask', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: query,
+              session_id: currentSessionId
+            })
+          });
+        } else {
+          response = await fetch('/ask_general', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              query: query
+            })
+          });
+        }
+
+        const result = await response.json();
+
+        if (response.ok) {
+          addMessage('assistant', result.response, messageType);
+          
+          if (messageType === 'symptoms' && result.recommended_doctors && Array.isArray(result.recommended_doctors) && result.recommended_doctors.length > 0) {
+            addDoctorRecommendations(result.recommended_doctors, result.specialization || 'General');
+          }
+        } else {
+          showError(result.error || 'Failed to get response');
+        }
+      } catch (error) {
+        showError('Failed to send message: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function addDoctorRecommendations(doctors, specialization) {
+      const chatContainer = document.getElementById('chatContainer');
+      const container = document.createElement('div');
+      container.className = 'mb-8 max-w-3xl mx-auto select-text';
+
+      const heading = document.createElement('h4');
+      heading.className = 'font-extrabold text-purple-800 mb-6 flex items-center gap-3 text-xl';
+      heading.innerHTML = `<i class="fas fa-user-md text-purple-600"></i> Recommended Doctors (${specialization.charAt(0).toUpperCase() + specialization.slice(1)})`;
+      container.appendChild(heading);
+
+      doctors.forEach(doctor => {
+        const card = document.createElement('div');
+        card.className = 'doctor-card';
+
+        const info = document.createElement('div');
+        info.className = 'doctor-info';
+        info.innerHTML = `
+          <div class="doctor-name">${doctor.name}</div>
+          <div class="doctor-specialization">${doctor.specialization}</div>
+          <div class="doctor-location">${doctor.location}</div>
+        `;
+
+        const rating = document.createElement('div');
+        rating.className = 'doctor-rating';
+        const fullStars = Math.floor(doctor.rating);
+        const halfStar = doctor.rating - fullStars >= 0.5;
+        let starsHtml = '';
+        for(let i=0; i<fullStars; i++) {
+          starsHtml += '<i class="fas fa-star doctor-rating-stars"></i>';
+        }
+        if(halfStar) {
+          starsHtml += '<i class="fas fa-star-half-alt doctor-rating-stars"></i>';
+        }
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        for(let i=0; i<emptyStars; i++) {
+          starsHtml += '<i class="far fa-star doctor-rating-stars" style="color:#d8b4fe;"></i>';
+        }
+        rating.innerHTML = `${starsHtml} <span aria-label="Rating: ${doctor.rating.toFixed(1)} stars">${doctor.rating.toFixed(1)}</span>`;
+
+        card.appendChild(info);
+        card.appendChild(rating);
+        container.appendChild(card);
+      });
+
+      // Wrap container in a message bubble with system styling
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'flex items-start gap-4 max-w-3xl mx-auto';
+      messageDiv.innerHTML = `
+        <div class="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center text-white text-2xl select-none shadow-lg" aria-hidden="true">💡</div>
+      `;
+      messageDiv.appendChild(container);
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function addMessage(sender, content, messageType = null) {
+      const chatContainer = document.getElementById('chatContainer');
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'flex items-start gap-4 max-w-3xl mx-auto';
+
+      let avatar, bgColor, textColor, avatarBg;
+
+      if (sender === 'user') {
+        avatar = '👤';
+        avatarBg = 'bg-purple-700';
+        bgColor = 'bg-purple-700';
+        textColor = 'text-white';
+        messageDiv.classList.add('flex-row-reverse');
+      } else if (sender === 'system') {
+        avatar = '💡';
+        avatarBg = 'bg-purple-700';
+        bgColor = 'bg-purple-700';
+        textColor = 'text-white';
+      } else {
+        avatar = '🤖';
+        avatarBg = 'bg-white';
+        bgColor = 'bg-purple-50';
+        textColor = 'text-purple-900';
+      }
+
+      let typeIndicator = '';
+      if (sender === 'user' && messageType) {
+        const typeConfig = {
+          'symptoms': { icon: '🩺', label: 'Symptoms Analysis', class: 'type-symptoms' },
+          'report': { icon: '📊', label: 'Report Question', class: 'type-report' },
+          'general': { icon: '❓', label: 'General Question', class: 'type-general' }
+        };
+        
+        const config = typeConfig[messageType];
+        if (config) {
+          typeIndicator = `
+            <div class="message-type-indicator ${config.class}">
+              ${config.icon} ${config.label}
+            </div>
+          `;
+        }
+      }
+
+      messageDiv.innerHTML = `
+        <div class="w-12 h-12 ${avatarBg} rounded-full flex items-center justify-center text-white text-2xl select-none" aria-hidden="true">
+          ${avatar}
+        </div>
+        <div class="${bgColor} rounded-3xl p-6 max-w-[80%] shadow-lg border border-purple-300 break-words">
+          <div class="font-semibold ${textColor} mb-4 text-lg select-text">
+            ${sender === 'user' ? 'You' : sender === 'system' ? 'System' : 'Medical Assistant'}
+          </div>
+          ${typeIndicator}
+          <div class="message-content ${textColor} select-text">
+            ${parseMarkdown(content)}
+          </div>
+        </div>
+      `;
+
+      chatContainer.appendChild(messageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function parseMarkdown(text) {
+      if (!text) return '';
+      // Escape HTML special chars to prevent injection
+      text = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      // Simple markdown parsing
+      text = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n/g, '<br>')
+        .replace(/^(.*)$/gm, '<p>$1</p>')
+        .replace(/• /g, '<li>')
+        .replace(/<p><li>/g, '<ul><li>')
+        .replace(/<\/li><\/p>/g, '</li></ul>');
+      return text;
+    }
+
+    function askSampleQuestion(question) {
+      document.getElementById('questionInput').value = question;
+      sendMessage();
+    }
+
+    function showError(message) {
+      addMessage('system', `❌ Error: <strong>${message}</strong>`);
+    }
+
+    function setLoading(loading) {
+      isProcessing = loading;
+      const sendBtn = document.getElementById('sendBtn');
+      
+      if (loading) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        addTypingIndicator();
+      } else {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane fa-lg"></i>';
+        removeTypingIndicator();
+      }
+    }
+
+    function addTypingIndicator() {
+      const chatContainer = document.getElementById('chatContainer');
+      if (document.getElementById('typingIndicator')) return;
+      const typingDiv = document.createElement('div');
+      typingDiv.id = 'typingIndicator';
+      typingDiv.className = 'flex items-start gap-4 max-w-3xl mx-auto';
+      typingDiv.innerHTML = `
+        <div class="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center text-white text-2xl select-none" aria-hidden="true">
+          🤖
+        </div>
+        <div class="bg-purple-50 rounded-3xl p-6 shadow-lg border border-purple-300 max-w-[80%]">
+          <div class="typing-indicator" aria-label="Assistant is typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      chatContainer.appendChild(typingDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+      const typingIndicator = document.getElementById('typingIndicator');
+      if (typingIndicator) {
+        typingIndicator.remove();
+      }
+    }
+
+    function clearChat() {
+      const chatContainer = document.getElementById('chatContainer');
+      chatContainer.innerHTML = `
+        <div class="flex items-start gap-4 max-w-3xl mx-auto">
+          <div class="w-12 h-12 bg-purple-700 rounded-full flex items-center justify-center text-white text-2xl select-none" aria-hidden="true">
+            🤖
+          </div>
+          <div class="bg-purple-50 rounded-3xl p-6 max-w-[80%] shadow-lg border border-purple-200">
+            <div class="font-semibold text-purple-900 mb-3 text-xl select-text">Smart Medical Assistant</div>
+            <div class="text-purple-800 select-text leading-relaxed">
+              Hello! I'm your intelligent medical assistant. I can automatically detect and help with:
+              <ul class="list-disc list-inside mt-3 space-y-1">
+                <li><span class="font-semibold text-orange-600">Symptoms</span> - Describe how you feel and get doctor recommendations</li>
+                <li><span class="font-semibold text-blue-600">Lab Reports</span> - Upload PDFs for instant analysis</li>
+                <li><span class="font-semibold text-purple-600">General Questions</span> - Ask about health conditions, medications, etc.</li>
+              </ul>
+              <div class="mt-5 p-4 bg-blue-100 border-l-6 border-blue-600 rounded-lg text-sm text-blue-900 font-semibold select-text shadow-sm flex items-center gap-2">
+                <i class="fas fa-robot text-blue-600 text-lg"></i>
+                <span><strong>Smart Detection:</strong> Just type your message naturally - I'll automatically understand what type of help you need!</span>
+              </div>
+              <div class="mt-4 p-4 bg-yellow-100 border-l-6 border-yellow-500 rounded-lg text-sm text-yellow-900 font-semibold select-text shadow-sm flex items-center gap-2">
+                <i class="fas fa-exclamation-triangle text-yellow-600 text-lg"></i>
+                <span><strong>Important:</strong> I provide educational information only. Always consult your healthcare provider for medical advice.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      clearFile();
+      document.getElementById('questionInput').focus();
+    }
+  </script>
+ </body>
+</html>

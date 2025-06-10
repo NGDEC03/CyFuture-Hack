@@ -71,7 +71,7 @@ A comprehensive healthcare management platform that connects patients with healt
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/ngdec03/CyFuture-Hack.git>
    cd med/client
    ```
 

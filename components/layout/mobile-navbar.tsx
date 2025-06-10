@@ -6,13 +6,11 @@ import { useService } from '@/context/serviceProvider'
 import Link from 'next/link'
 import Image from 'next/image'
 
-// Remove MobileNavbarProps as we'll use context instead
 const MobileNavbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isHomePage, setIsHomePage] = useState(false);
 
-    // Add click outside handler
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             const target = e.target as HTMLElement;

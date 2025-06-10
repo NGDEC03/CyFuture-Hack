@@ -10,7 +10,7 @@ import Image from 'next/image'
 const MobileNavbar: FC = () => {
     const { serviceType, toggleService } = useService()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const isHomePage = location.pathname === '/'
+    const [isHomePage, setIsHomePage] = useState(false);
 
     // Add click outside handler
     useEffect(() => {
@@ -20,6 +20,8 @@ const MobileNavbar: FC = () => {
                 setIsMobileMenuOpen(false);
             }
         };
+
+        if (window.location.pathname !== '/') setIsHomePage(false);
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);

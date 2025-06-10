@@ -120,3 +120,141 @@
     @apply bg-background text-foreground;
   }
 }
+
+body {
+  font-family: 'Inter', sans-serif;
+  overflow: hidden; /* Prevent body scroll when chatbot is open */
+}
+
+/* Header styles (adapted for React component) */
+.pulse-dot {
+  color: #34d399; /* Green for active status */
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* Scrollbar styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #a78bfa #e9d5ff; /* thumb and track */
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #e9d5ff;
+  border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #a78bfa;
+  border-radius: 10px;
+  border: 2px solid #e9d5ff;
+}
+
+/* Message type indicators */
+.message-type-indicator {
+  @apply text-xs font-semibold px-2 py-1 rounded-full mb-3 inline-flex items-center gap-1;
+}
+
+.type-symptoms {
+  @apply bg-orange-100 text-orange-700 border border-orange-300;
+}
+
+.type-report {
+  @apply bg-blue-100 text-blue-700 border border-blue-300;
+}
+
+.type-general {
+  @apply bg-purple-100 text-purple-700 border border-purple-300;
+}
+
+/* Doctor card styles (originally from JS, now explicit CSS) */
+.doctor-card {
+  @apply bg-white p-4 rounded-xl shadow-sm border border-purple-200;
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-info {
+  @apply text-purple-800 mb-2;
+}
+
+.doctor-name {
+  @apply font-bold text-lg;
+}
+
+.doctor-specialization {
+  @apply text-sm opacity-90;
+}
+
+.doctor-location {
+  @apply text-sm opacity-70;
+}
+
+.doctor-rating {
+  @apply flex items-center text-purple-600;
+}
+
+.doctor-rating-stars {
+  @apply mr-1;
+  color: #8B5CF6; /* Default purple star color */
+}
+
+/* Dot flashing animation for processing state */
+.dot-flashing {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #a78bfa; /* Example purple */
+  color: #a78bfa;
+  animation: dotFlashing 1s infinite linear alternate;
+  animation-delay: .5s;
+}
+
+.dot-flashing::before, .dot-flashing::after {
+  content: '';
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+
+.dot-flashing::before {
+  left: -15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #a78bfa;
+  color: #a78bfa;
+  animation: dotFlashing 1s infinite linear alternate;
+  animation-delay: 0s;
+}
+
+.dot-flashing::after {
+  left: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: #a78bfa;
+  color: #a78bfa;
+  animation: dotFlashing 1s infinite linear alternate;
+  animation-delay: 1s;
+}
+
+@keyframes dotFlashing {
+  0% {
+    background-color: #a78bfa;
+  }
+  50%,
+  100% {
+    background-color: #e9d5ff; /* Lighter purple when inactive */
+  }
+}

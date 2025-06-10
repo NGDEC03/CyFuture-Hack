@@ -36,8 +36,6 @@ export default function Provider({ children }: { children: React.ReactNode }) {
                                 <Navbar />
                             </div>
                             {children}
-                            <h1 className="text-4xl p-8 text-center text-purple-800 font-bold">Welcome to Our Medical Service</h1>
-                            <p className="text-center text-lg text-gray-600">Click the robot icon to start a conversation!</p>
 
                             {isChatbotOpen && <Chatbot onClose={() => setIsChatbotOpen(false)} />}
                             <ChatbotIcon onClick={toggleChatbot} />

@@ -1,8 +1,11 @@
 import { Doctor } from '@/types/doctor';
 import Image from 'next/image';
 import { useState } from 'react';
+interface Props {
+    doctors: Doctor[];
+}
 
-const DoctorsList = ({ doctors }: { doctors: Doctor[] }) => {
+const DoctorsList = ({ doctors }: Props) => {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
     const totalPages = Math.ceil(doctors.length / itemsPerPage);
@@ -20,7 +23,7 @@ const DoctorsList = ({ doctors }: { doctors: Doctor[] }) => {
     return (
         <div className="flex flex-col gap-6">
             <div className="grid grid-cols-1 gap-4 lg:gap-6 px-2 lg:px-6 w-full lg:grid-cols-3">
-                {displayedDoctors.map((doctor) => (
+                {displayedDoctors.map((doctor : Doctor) => (
                     <div
                         key={doctor.id}
                         onClick={() => handleDoctorClick(doctor.id)}

@@ -7,7 +7,7 @@ import Categories from "@/components/dash/hospital/Categories";
 import DoctorsList from '@/components/dash/hospital/DoctorsList';
 import { FacilityBanner } from "@/components/dash/hospital/FacilityBanner";
 import { API_BASE_URL, fetchDoctorsBySpecialization } from "@/services/api"
-import { Doctor } from '@/types/doctor';
+// import { Doctor } from '@/types/doctor';
 
 const HospitalDetails: FC = () => {
     const { id } = useParams();
@@ -43,15 +43,7 @@ const HospitalDetails: FC = () => {
             const data = await fetchDoctorsBySpecialization(selectedCategory);
             const hospitalDoctors = data.filter(doc => doc.hospitalId === hospitalId);
 
-            return hospitalDoctors.map(doc => ({
-                id: doc.doctor.id,
-                name: doc.doctor.user.name,
-                image: '/doctors/doctor1.jpg',
-                qualification: doc.doctor.qualifications.join(', '),
-                specialization: doc.doctor.specialization.join(', '),
-                rating: doc.doctor.ratings,
-                patientsCount: (doc.doctor as Doctor).noOfPatients + '+'
-            }));
+            return hospitalDoctors.map(doc => doc.doctor);
         },
         enabled: !!hospitalId && !!selectedCategory
     });

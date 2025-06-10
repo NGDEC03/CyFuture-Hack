@@ -22,7 +22,7 @@ const Navbar: FC = () => {
     const [isSearching, setIsSearching] = useState(false)
     const [userLocation, setUserLocation] = useState<Location | null>(null)
     const [isGettingLocation, setIsGettingLocation] = useState(false)
-    const isHomePage = location.pathname === '/';
+    const [isHomePage, setIsHomePage] = useState(false);
 
     const navigate = (path: string) => {
         window.location.href = path;
@@ -32,6 +32,8 @@ const Navbar: FC = () => {
         if (isAuthenticated) {
             fetchUserProfile();
         }
+
+        if (window.location.pathname !== '/') setIsHomePage(false);
     }, [isAuthenticated]);
 
     const fetchUserProfile = async () => {

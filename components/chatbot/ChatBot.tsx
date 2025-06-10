@@ -148,7 +148,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
 
     return (
         <div
-            className="fixed bottom-4 right-4 z-40 bg-white/95 backdrop-blur-lg border border-purple-300 rounded-3xl shadow-2xl flex flex-col h-[calc(100vh-96px)] max-h-[800px] w-[calc(100vw-32px)] max-w-2xl overflow-hidden"
+            className="fixed bottom-4 right-20 z-40 bg-white/95 backdrop-blur-lg border border-purple-300 rounded-3xl shadow-2xl flex flex-col h-[calc(100vh-96px)] max-h-[800px] w-[calc(100vw-32px)] max-w-2xl overflow-hidden"
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}

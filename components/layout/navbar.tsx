@@ -27,6 +27,7 @@ const Navbar: FC = () => {
     const navigate = (path: string) => {
         window.location.href = path;
     }
+console.log(user);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -56,7 +57,7 @@ const Navbar: FC = () => {
 
     const handleProfileClick = () => {
         if (!isAuthenticated) {
-            navigate('/signin')
+            navigate('/auth/signin')
         } else {
             setIsProfileMenuOpen(!isProfileMenuOpen)
         }
@@ -65,7 +66,7 @@ const Navbar: FC = () => {
     const handleLogout = () => {
         logout()
         setIsProfileMenuOpen(false)
-        navigate('/signin')
+        navigate('/auth/signin')
     }
 
     const getCurrentLocation = () => {

@@ -17,7 +17,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         fetchUserProfile();
-    }, []);
+    }, [user]);
 
     const fetchUserProfile = async () => {
         const token = localStorage.getItem("token");
@@ -39,7 +39,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
             setUser(response.data);
         } catch (error) {
             console.log(error);
-            localStorage.removeItem("token");
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                localStorage.removeItem("token");
+            }
         } finally {
             setIsLoading(false);
         }

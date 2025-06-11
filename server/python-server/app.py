@@ -4,13 +4,15 @@ import uuid
 import io
 import re
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from phi.agent import Agent
 from phi.model.google import Gemini
 from phi.tools.duckduckgo import DuckDuckGo
-
+import asyncio
+from connection import fetch_doctors_with_user
+from data import SYMPTOM_KEYWORDS,SYMPTOM_SPECIALIZATION_MAP
 load_dotenv()
 
 app = Flask(__name__)
@@ -25,208 +27,10 @@ SESSION_TIMEOUT_MINUTES = 30
 session_data = {}
 
 # Sample doctors database - Replace with your actual database
-DOCTORS_DATABASE = {
-    'cardiology': [
-        {'name': 'Dr. Sarah Johnson', 'specialization': 'Cardiology', 'location': 'New York', 'rating': 4.8},
-        {'name': 'Dr. Michael Chen', 'specialization': 'Cardiology', 'location': 'California', 'rating': 4.9},
-    ],
-    'neurology': [
-        {'name': 'Dr. Emma Davis', 'specialization': 'Neurology', 'location': 'Texas', 'rating': 4.7},
-        {'name': 'Dr. James Wilson', 'specialization': 'Neurology', 'location': 'Florida', 'rating': 4.6},
-    ],
-    'gastroenterology': [
-        {'name': 'Dr. Lisa Rodriguez', 'specialization': 'Gastroenterology', 'location': 'Chicago', 'rating': 4.8},
-        {'name': 'Dr. David Kim', 'specialization': 'Gastroenterology', 'location': 'Seattle', 'rating': 4.7},
-    ],
-    'dermatology': [
-        {'name': 'Dr. Amanda Taylor', 'specialization': 'Dermatology', 'location': 'Miami', 'rating': 4.9},
-        {'name': 'Dr. Robert Brown', 'specialization': 'Dermatology', 'location': 'Denver', 'rating': 4.6},
-    ],
-    'orthopedics': [
-        {'name': 'Dr. Kevin Martinez', 'specialization': 'Orthopedics', 'location': 'Phoenix', 'rating': 4.8},
-        {'name': 'Dr. Jennifer Lee', 'specialization': 'Orthopedics', 'location': 'Boston', 'rating': 4.7},
-    ],
-    'general': [
-        {'name': 'Dr. Mary Anderson', 'specialization': 'General Medicine', 'location': 'Atlanta', 'rating': 4.5},
-        {'name': 'Dr. Thomas Garcia', 'specialization': 'General Medicine', 'location': 'Portland', 'rating': 4.6},
-    ]
-}
+
 
 # Symptom-to-specialization mapping
-SYMPTOM_SPECIALIZATION_MAP = {
-    # Cardiology
-    'chest pain': 'cardiology',
-    'heart palpitations': 'cardiology',
-    'shortness of breath': 'cardiology',
-    'high blood pressure': 'cardiology',
-    'low blood pressure': 'cardiology',
-    'irregular heartbeat': 'cardiology',
-    'swelling in legs': 'cardiology',
 
-    # Neurology
-    'headache': 'neurology',
-    'dizziness': 'neurology',
-    'seizure': 'neurology',
-    'memory loss': 'neurology',
-    'migraine': 'neurology',
-    'numbness': 'neurology',
-    'tingling sensation': 'neurology',
-    'difficulty speaking': 'neurology',
-    'vision problems': 'neurology',
-    'tremors': 'neurology',
-
-    # Gastroenterology
-    'stomach pain': 'gastroenterology',
-    'nausea': 'gastroenterology',
-    'vomiting': 'gastroenterology',
-    'diarrhea': 'gastroenterology',
-    'constipation': 'gastroenterology',
-    'bloating': 'gastroenterology',
-    'acid reflux': 'gastroenterology',
-    'blood in stool': 'gastroenterology',
-    'loss of appetite': 'gastroenterology',
-
-    # Dermatology
-    'skin rash': 'dermatology',
-    'acne': 'dermatology',
-    'itching': 'dermatology',
-    'skin lesion': 'dermatology',
-    'dry skin': 'dermatology',
-    'eczema': 'dermatology',
-    'psoriasis': 'dermatology',
-    'hair loss': 'dermatology',
-    'nail discoloration': 'dermatology',
-
-    # Orthopedics
-    'joint pain': 'orthopedics',
-    'back pain': 'orthopedics',
-    'fracture': 'orthopedics',
-    'muscle pain': 'orthopedics',
-    'knee pain': 'orthopedics',
-    'shoulder pain': 'orthopedics',
-    'swollen joints': 'orthopedics',
-    'difficulty walking': 'orthopedics',
-
-    # Pulmonology
-    'chronic cough': 'pulmonology',
-    'wheezing': 'pulmonology',
-    'difficulty breathing': 'pulmonology',
-    'cough with blood': 'pulmonology',
-    'asthma symptoms': 'pulmonology',
-
-    # Endocrinology
-    'fatigue': 'endocrinology',
-    'weight gain': 'endocrinology',
-    'weight loss': 'endocrinology',
-    'excessive thirst': 'endocrinology',
-    'frequent urination': 'endocrinology',
-    'sweating': 'endocrinology',
-    'heat intolerance': 'endocrinology',
-
-    # Psychiatry
-    'depression': 'psychiatry',
-    'anxiety': 'psychiatry',
-    'insomnia': 'psychiatry',
-    'mood swings': 'psychiatry',
-    'hallucinations': 'psychiatry',
-    'panic attacks': 'psychiatry',
-
-    # Ophthalmology
-    'blurred vision': 'ophthalmology',
-    'eye pain': 'ophthalmology',
-    'red eyes': 'ophthalmology',
-    'watery eyes': 'ophthalmology',
-    'double vision': 'ophthalmology',
-
-    # ENT
-    'ear pain': 'ent',
-    'hearing loss': 'ent',
-    'sore throat': 'ent',
-    'nasal congestion': 'ent',
-    'runny nose': 'ent',
-    'loss of smell': 'ent',
-
-    # Urology
-    'painful urination': 'urology',
-    'blood in urine': 'urology',
-    'urinary incontinence': 'urology',
-    'frequent urination': 'urology',
-    'difficulty urinating': 'urology',
-
-    # Gynecology
-    'irregular periods': 'gynecology',
-    'pelvic pain': 'gynecology',
-    'vaginal discharge': 'gynecology',
-    'pain during intercourse': 'gynecology',
-    'pregnancy-related issues': 'gynecology',
-
-    # Pediatrics (for children)
-    'crying excessively': 'pediatrics',
-    'fever in child': 'pediatrics',
-    'rashes in child': 'pediatrics',
-    'delayed milestones': 'pediatrics',
-}
-
-
-# Symptom keywords for detection
-SYMPTOM_KEYWORDS = [
-    # General symptom verbs and descriptors
-    'pain', 'ache', 'hurt', 'sore', 'tender', 'burning', 'stabbing', 'throbbing',
-    'cramping', 'sharp pain', 'dull pain', 'pressure', 'tingling', 'numbness',
-    'swelling', 'inflammation', 'discomfort', 'bruising', 'sensitivity',
-
-    # Head & neurological
-    'headache', 'migraine', 'dizziness', 'lightheadedness', 'vertigo',
-    'seizure', 'tremors', 'memory loss', 'confusion', 'blurred vision',
-    'double vision', 'difficulty speaking', 'loss of balance', 'fainting',
-
-    # Digestive
-    'nausea', 'vomiting', 'stomach pain', 'abdominal pain', 'bloating',
-    'diarrhea', 'constipation', 'gas', 'indigestion', 'acid reflux',
-    'loss of appetite', 'heartburn', 'cramps', 'blood in stool',
-
-    # Respiratory
-    'cough', 'sneeze', 'runny nose', 'nasal congestion', 'shortness of breath',
-    'wheezing', 'chest pain', 'tight chest', 'difficulty breathing',
-    'coughing up blood', 'phlegm', 'hoarseness',
-
-    # Cardiovascular
-    'heart palpitations', 'irregular heartbeat', 'fast heartbeat', 'slow heartbeat',
-    'chest tightness', 'high blood pressure', 'low blood pressure',
-    'swelling in legs', 'cold hands and feet',
-
-    # Skin & allergy
-    'rash', 'itching', 'dry skin', 'flaky skin', 'redness', 'hives',
-    'skin peeling', 'eczema', 'acne', 'psoriasis', 'skin lesion',
-    'discoloration', 'lumps', 'boils', 'blisters',
-
-    # Musculoskeletal
-    'joint pain', 'back pain', 'neck pain', 'muscle pain', 'stiffness',
-    'limited mobility', 'cramps', 'spasms', 'bone pain', 'fracture',
-
-    # Mental health
-    'fatigue', 'tired', 'weakness', 'exhaustion', 'anxiety', 'depression',
-    'stress', 'mood swings', 'irritability', 'insomnia', 'sleep problems',
-    'hallucinations', 'panic attacks', 'feeling down', 'low energy',
-
-    # Urology & genital
-    'frequent urination', 'painful urination', 'burning while urinating',
-    'blood in urine', 'urinary incontinence', 'vaginal discharge',
-    'irregular periods', 'pelvic pain', 'pain during intercourse',
-
-    # Eye & ENT
-    'eye pain', 'red eyes', 'watery eyes', 'blurred vision', 'itchy eyes',
-    'ear pain', 'hearing loss', 'ringing in ears', 'sore throat',
-    'difficulty swallowing', 'loss of smell', 'loss of taste',
-
-    # Infection & immune response
-    'fever', 'chills', 'night sweats', 'body aches', 'swollen glands',
-
-    # Common phrases for NLP
-    'experiencing', 'feeling', 'having', 'suffering from', 'showing symptoms of',
-    'dealing with', 'complaining of', 'symptoms', 'signs', 'issues',
-    'problem', 'trouble', 'unwell', 'sick', 'not feeling well'
-]
 
 # Initialize AI Agents
 lab_agent = Agent(
@@ -356,11 +160,30 @@ def analyze_symptoms_for_specialization(symptoms_text):
     else:
         return 'general'
 
-
-#Database Handle(work for Ankush)
 def get_doctors_by_specialization(specialization):
-    """Get doctors from database by specialization"""
-    return DOCTORS_DATABASE.get(specialization, DOCTORS_DATABASE['general'])
+    data = asyncio.run(fetch_doctors_with_user())
+    # print(data)
+    ans = []
+
+    # print(f"Looking for specialization: {specialization.lower()}")
+
+    for doc in data:
+        specializations = doc.get('Specialization', [])
+        # print(f"Doctor: {doc['name']} - Specializations: {specializations}")
+
+        # Lowercase conversion for matching
+        specializations_lower = [spec.lower() for spec in specializations]
+        # print(f"Converted Specializations: {specializations_lower}")
+
+        if specialization.lower() in specializations_lower:
+            # print(f"Matched Doctor: {doc['name']}")
+            ans.append({
+                "Doctor Name": doc["name"],
+                "Rating": doc["rating"]
+            })
+
+    # print("Final matched doctors:", ans)
+    return ans
 
 #Storing data(work for Ankush)
 def store_data_for_past_reports(request_type,data,any_file):
@@ -524,7 +347,7 @@ Please provide educational information about these symptoms. Remember to:
                 "query_type": "symptoms",
                 "symptoms": query,
                 "specialization": specialization,
-                "recommended_doctors": recommended_doctors[:3]  # Return top 3 doctors
+                "recommended_doctors": recommended_doctors[:1]  # Return top 3 doctors
             })
         
         # Handle general questions
@@ -695,7 +518,7 @@ Please provide educational information about these symptoms. Remember to:
 - Be reassuring while being informative
 - Use bullet points and clear formatting for better readability
 - Include disclaimer about not replacing professional medical advice"""
-        
+
         try:
             response = ""
             for chunk in symptoms_agent.run(full_prompt, stream=True):
@@ -712,7 +535,7 @@ Please provide educational information about these symptoms. Remember to:
             "response": response,
             "symptoms": symptoms,
             "specialization": specialization,
-            "recommended_doctors": recommended_doctors[:3]  # Return top 3 doctors
+            "recommended_doctors": recommended_doctors[:1]  # Return top 3 doctors
         })
     
     except Exception as e:
@@ -733,16 +556,6 @@ def get_session_info(session_id):
         "upload_time": session_info['timestamp'].isoformat()
     })
 
-@app.route('/health')
-def health_check():
-    """Health check endpoint"""
-    cleanup_expired_sessions()
-    
-    return jsonify({
-        "status": "healthy",
-        "active_sessions": len(session_data),
-        "timestamp": datetime.now().isoformat()
-    })
 
 # Error handlers
 @app.errorhandler(413)
@@ -758,15 +571,4 @@ def internal_error(e):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    print("🏥 Starting Enhanced Medical Assistant Server...")
-    print(f"📁 Max file size: {app.config['MAX_CONTENT_LENGTH'] / (1024*1024)}MB")
-    print(f"⏰ Session timeout: {SESSION_TIMEOUT_MINUTES} minutes")
-    print("🔗 Available endpoints:")
-    print("   - POST /upload - Upload PDF lab reports")
-    print("   - POST /smart_query - Smart query handler (auto-detects intent)")
-    print("   - POST /ask - Ask questions about uploaded reports")
-    print("   - POST /ask_general - Ask general medical questions")
-    print("   - POST /symptoms - Analyze symptoms and get doctor recommendations")
-    print("   - GET /health - Health check")
-    print("🚀 Server starting on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)

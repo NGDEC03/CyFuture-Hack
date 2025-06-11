@@ -5,6 +5,7 @@ import io
 import re
 from datetime import datetime, timedelta
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 from phi.agent import Agent
@@ -16,6 +17,7 @@ from data import SYMPTOM_KEYWORDS,SYMPTOM_SPECIALIZATION_MAP
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app, origins=['http://localhost:3000'])
 app.secret_key = os.getenv('SECRET_KEY', 'your-secret-key-here')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
@@ -25,12 +27,6 @@ SESSION_TIMEOUT_MINUTES = 30
 
 # In-memory session storage (for serverless deployment)
 session_data = {}
-
-# Sample doctors database - Replace with your actual database
-
-
-# Symptom-to-specialization mapping
-
 
 # Initialize AI Agents
 lab_agent = Agent(
@@ -178,6 +174,7 @@ def get_doctors_by_specialization(specialization):
         if specialization.lower() in specializations_lower:
             # print(f"Matched Doctor: {doc['name']}")
             ans.append({
+                "Doctor ID": doc["id"],
                 "Doctor Name": doc["name"],
                 "Rating": doc["rating"]
             })
@@ -571,4 +568,4 @@ def internal_error(e):
     return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=8000)

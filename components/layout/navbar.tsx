@@ -27,8 +27,7 @@ const Navbar: FC = () => {
     const navigate = (path: string) => {
         window.location.href = path;
     }
-console.log(user);
-
+    
     useEffect(() => {
         if (isAuthenticated) {
             fetchUserProfile();

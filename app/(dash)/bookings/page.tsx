@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import type { FC } from 'react'
 import { API_BASE_URL } from '@/services/api'
+import Image from 'next/image';
 
 interface BaseBooking {
     id: string;
@@ -68,7 +69,7 @@ const BookingsList: FC = () => {
                 throw new Error('No authentication token found');
             }
 
-            const statuses = activeTab === 'upcoming' 
+            const statuses = activeTab === 'upcoming'
                 ? ['PENDING', 'CONFIRMED', 'RESCHEDULED', 'CANCELLED']
                 : ['COMPLETED'];
 
@@ -88,13 +89,13 @@ const BookingsList: FC = () => {
                 console.log(`Fetched ${status} appointments:`, data);
                 allAppointments.push(...data);
             }
-console.log("appointments is",allAppointments);
+            console.log("appointments is", allAppointments);
 
             const transformedBookings: Booking[] = allAppointments
                 .map((appointment: any): Booking | null => {
                     if (appointment.doctorId) {
                         const hospital = appointment.doctor.affiliations?.[0]?.hospital;
-                        
+
                         return {
                             id: appointment.id,
                             type: 'doctor',
@@ -221,11 +222,11 @@ console.log("appointments is",allAppointments);
     };
 
     const filteredBookings = bookings.filter(booking => {
-        const isMatchingStatus = activeTab === 'upcoming' 
+        const isMatchingStatus = activeTab === 'upcoming'
             ? (booking.status === 'pending' || booking.status === 'confirmed' || booking.status === 'rescheduled')
             : booking.status === 'completed';
         const searchTerm = searchQuery.toLowerCase();
-        
+
         if (booking.type === 'doctor') {
             return isMatchingStatus && (
                 searchTerm === '' ||
@@ -241,10 +242,10 @@ console.log("appointments is",allAppointments);
         }
     });
 
- const openGoogleMaps = (coordinates: { lat: number; lng: number }) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
-    window.open(url, '_blank');
-};
+    const openGoogleMaps = (coordinates: { lat: number; lng: number }) => {
+        const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.lat},${coordinates.lng}`;
+        window.open(url, '_blank');
+    };
 
 
 
@@ -267,7 +268,7 @@ console.log("appointments is",allAppointments);
                     <div className="text-center py-8">
                         <div className="text-red-500 text-lg mb-2">⚠️</div>
                         <p className="text-gray-600">{error}</p>
-                        <button 
+                        <button
                             onClick={fetchBookings}
                             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                         >
@@ -327,7 +328,10 @@ console.log("appointments is",allAppointments);
                                 <div className="flex flex-col sm:flex-row gap-4">
                                     {booking.type === 'doctor' ? (
                                         <>
-                                            <img
+                                            <Image
+                                                width={80}
+                                                height={80}
+                                                unoptimized
                                                 src={booking.doctorImage}
                                                 alt={booking.doctorName}
                                                 className="w-20 h-20 sm:w-16 sm:h-16 rounded-full object-cover mx-auto sm:mx-0"
@@ -359,7 +363,7 @@ console.log("appointments is",allAppointments);
                                     ) : (
                                         <>
                                             <div className="w-20 h-20 sm:w-16 sm:h-16 rounded-full bg-blue-100 flex items-center justify-center mx-auto sm:mx-0">
-                                                <img src={booking.testIcon} alt={booking.testName} className="w-8 h-8" />
+                                                <Image src={booking.testIcon} alt={booking.testName} className="w-8 h-8" />
                                             </div>
                                             <div className="flex-1 space-y-3">
                                                 <div className="text-center sm:text-left">

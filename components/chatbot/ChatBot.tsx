@@ -207,6 +207,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
         let doctorContent = `**Recommended Doctors (${specialization.charAt(0).toUpperCase() + specialization.slice(1)})**\n\n`;
         setRecommendedDoctors(doctors);
         doctors.forEach((doctor) => {
+            console.log(doctor['Doctor ID']);
             const stars = '⭐'.repeat(Math.floor(doctor.Rating));
             doctorContent += `**${doctor["Doctor Name"]}**\n`;
             doctorContent += `Rating: ${stars} ${doctor.Rating.toFixed(1)}/5\n`;
@@ -516,7 +517,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ onClose }) => {
                                         <div
                                             key={doc["Doctor ID"]}
                                             className="cursor-pointer border border-purple-300 p-4 rounded-xl shadow-sm hover:bg-purple-50 transition"
-                                            onClick={() => router.push(`/hospital/${doc["Doctor ID"]}`)}
+                                            onClick={() => router.push(`/doctor/${doc["Doctor ID"]}`)}
                                         >
                                             <div className="text-xl font-semibold">{doc["Doctor Name"]}</div>
                                             <div className="text-sm text-gray-600">⭐ {doc.Rating.toFixed(1)} / 5</div>
